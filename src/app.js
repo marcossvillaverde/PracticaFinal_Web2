@@ -7,6 +7,7 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import { notFound, errorHandler } from './middleware/error-handler.js';
+import userRoutes from './routes/user.routes.js';
 
 const app = express();
 
@@ -48,6 +49,8 @@ app.get('/health', (_req, res) => {
 });
 
 //  Rutas (futuras)
+// Rutas de la API
+app.use('/api/user', userRoutes);
 
 // Manejo de errores
 app.use(notFound);
