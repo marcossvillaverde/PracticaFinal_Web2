@@ -9,6 +9,7 @@ import mongoose from 'mongoose';
 import { notFound, errorHandler } from './middleware/error-handler.js';
 import userRoutes from './routes/user.routes.js';
 import clientRoutes from './routes/client.routes.js';
+import projectRoutes from './routes/project.routes.js';
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.get('/health', (_req, res) => {
 // Rutas de la API
 app.use('/api/user', userRoutes);
 app.use('/api/client', clientRoutes);
+app.use('/api/project', projectRoutes);
 
 // Manejo de errores
 app.use(notFound);
