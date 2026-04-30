@@ -4,7 +4,8 @@
 import { Router } from 'express';
 import {
   createDeliveryNote, getDeliveryNotes,
-  getDeliveryNote, deleteDeliveryNote, downloadPDF,
+  getDeliveryNote, deleteDeliveryNote,
+  downloadPDF, signDeliveryNote,
 } from '../controllers/deliverynote.controller.js';
 import { validate } from '../middleware/validate.js';
 import authMiddleware from '../middleware/auth.middleware.js';
@@ -12,6 +13,8 @@ import {
   deliveryNoteSchema,
   deliveryNoteQuerySchema,
 } from '../validators/deliverynote.validator.js';
+import upload from '../middleware/upload.js';
+
 
 const router = Router();
 
@@ -21,6 +24,7 @@ router.post('/',       validate(deliveryNoteSchema),      createDeliveryNote);
 router.get('/',        validate(deliveryNoteQuerySchema), getDeliveryNotes);
 router.get('/pdf/:id',                                    downloadPDF);
 router.get('/:id',                                        getDeliveryNote);
+router.patch('/:id/sign', upload.single('signature'), signDeliveryNote);
 router.delete('/:id',                                     deleteDeliveryNote);
 
 export default router;

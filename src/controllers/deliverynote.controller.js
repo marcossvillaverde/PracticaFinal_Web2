@@ -7,6 +7,7 @@ import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { generateDeliveryNotePDF } from '../services/pdf.service.js';
+import { uploadSignature, uploadPDF } from '../services/storage.service.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -202,6 +203,60 @@ export const downloadPDF = async (req, res, next) => {
     });
 
     res.send(pdfBuffer);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /api/deliverynote/:id/sign
+export const signDeliveryNote = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { company } = req.user;
+
+    if (!req.file) {
+      return next(AppError.badRequest('Debes subir una imagen de la firma'));
+    }
+
+    const albaran = await DeliveryNote.findOne({
+      _id:     id,
+      company: company._id,
+      deleted: false,
+    })
+      .populate('user',    'name lastName email')
+      .populate('client',  'name cif email phone address')
+      .populate('project', 'name projectCode address email notes')
+      .populate('company', 'name cif address logo');
+
+    if (!albaran) {
+      return next(AppError.notFound('Albaran'));
+    }
+
+    // Un albaran ya firmado no puede volver a firmarse
+    if (albaran.signed) {
+      return next(AppError.conflict('El albaran ya esta firmado'));
+    }
+
+    // Subimos la firma a Cloudinary optimizada con Sharp
+    const signatureUrl = await uploadSignature(req.file.buffer);
+
+    // Marcamos el albaran como firmado
+    albaran.signed       = true;
+    albaran.signedAt     = new Date();
+    albaran.signatureUrl = signatureUrl;
+
+    // Generamos el PDF con la firma incluida y lo subimos a Cloudinary
+    const pdfBuffer = await generateDeliveryNotePDF(albaran);
+    const pdfUrl    = await uploadPDF(pdfBuffer, `albaran-${albaran._id}`);
+    albaran.pdfUrl  = pdfUrl;
+
+    await albaran.save();
+
+    res.json({
+      mensaje:      'Albaran firmado correctamente',
+      signatureUrl,
+      pdfUrl,
+    });
   } catch (err) {
     next(err);
   }
