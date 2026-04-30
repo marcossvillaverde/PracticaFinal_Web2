@@ -6,6 +6,7 @@ import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
+import { generateDeliveryNotePDF } from '../services/pdf.service.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -160,6 +161,47 @@ export const deleteDeliveryNote = async (req, res, next) => {
     await DeliveryNote.findByIdAndDelete(id);
 
     res.json({ mensaje: 'Albaran eliminado correctamente' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/deliverynote/pdf/:id
+export const downloadPDF = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { company } = req.user;
+
+    const albaran = await DeliveryNote.findOne({
+      _id:     id,
+      company: company._id,
+      deleted: false,
+    })
+      .populate('user',    'name lastName email')
+      .populate('client',  'name cif email phone address')
+      .populate('project', 'name projectCode address email notes')
+      .populate('company', 'name cif address logo');
+
+    if (!albaran) {
+      return next(AppError.notFound('Albaran'));
+    }
+
+    // Si ya esta firmado y tiene PDF en la nube lo redirigimos directamente
+    if (albaran.signed && albaran.pdfUrl) {
+      return res.redirect(albaran.pdfUrl);
+    }
+
+    // Generamos el PDF en memoria
+    const pdfBuffer = await generateDeliveryNotePDF(albaran);
+
+    // Enviamos el PDF como descarga
+    res.set({
+      'Content-Type':        'application/pdf',
+      'Content-Disposition': `attachment; filename="albaran-${albaran._id}.pdf"`,
+      'Content-Length':      pdfBuffer.length,
+    });
+
+    res.send(pdfBuffer);
   } catch (err) {
     next(err);
   }

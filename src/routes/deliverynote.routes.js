@@ -4,7 +4,7 @@
 import { Router } from 'express';
 import {
   createDeliveryNote, getDeliveryNotes,
-  getDeliveryNote, deleteDeliveryNote,
+  getDeliveryNote, deleteDeliveryNote, downloadPDF,
 } from '../controllers/deliverynote.controller.js';
 import { validate } from '../middleware/validate.js';
 import authMiddleware from '../middleware/auth.middleware.js';
@@ -17,9 +17,10 @@ const router = Router();
 
 router.use(authMiddleware);
 
-router.post('/',    validate(deliveryNoteSchema),      createDeliveryNote);
-router.get('/',     validate(deliveryNoteQuerySchema), getDeliveryNotes);
-router.get('/:id',                                     getDeliveryNote);
-router.delete('/:id',                                  deleteDeliveryNote);
+router.post('/',       validate(deliveryNoteSchema),      createDeliveryNote);
+router.get('/',        validate(deliveryNoteQuerySchema), getDeliveryNotes);
+router.get('/pdf/:id',                                    downloadPDF);
+router.get('/:id',                                        getDeliveryNote);
+router.delete('/:id',                                     deleteDeliveryNote);
 
 export default router;
