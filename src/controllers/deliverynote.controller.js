@@ -8,6 +8,7 @@ import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { generateDeliveryNotePDF } from '../services/pdf.service.js';
 import { uploadSignature, uploadPDF } from '../services/storage.service.js';
+import { getIO } from '../sockets/index.js';
 
 // POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
@@ -59,6 +60,12 @@ export const createDeliveryNote = async (req, res, next) => {
       hours,
       workers,
     });
+
+    // Emitimos evento en tiempo real a todos los usuarios de la compañia
+    getIO().to(company._id.toString()).emit('deliverynote:new', {
+      _id:    albaran._id,
+      format: albaran.format,
+  });
 
     res.status(201).json({ mensaje: 'Albaran creado correctamente', albaran });
   } catch (err) {
@@ -251,6 +258,13 @@ export const signDeliveryNote = async (req, res, next) => {
     albaran.pdfUrl  = pdfUrl;
 
     await albaran.save();
+
+    // Notificamos a la compañia que el albaran ha sido firmado
+    getIO().to(company._id.toString()).emit('deliverynote:signed', {
+      _id:          albaran._id,
+      signatureUrl,
+      pdfUrl,
+    });
 
     res.json({
       mensaje:      'Albaran firmado correctamente',

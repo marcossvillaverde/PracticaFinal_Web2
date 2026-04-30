@@ -4,6 +4,7 @@
 
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
+import { getIO } from '../sockets/index.js';
 
 // POST /api/client
 export const createClient = async (req, res, next) => {
@@ -31,6 +32,12 @@ export const createClient = async (req, res, next) => {
       email,
       phone,
       address,
+    });
+
+    // Emitimos evento en tiempo real a todos los usuarios de la compañia
+    getIO().to(company._id.toString()).emit('client:new', {
+      _id:  cliente._id,
+      name: cliente.name,
     });
 
     res.status(201).json({ mensaje: 'Cliente creado correctamente', cliente });
