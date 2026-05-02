@@ -333,7 +333,8 @@ export const inviteUser = async (req, res, next) => {
     });
 
     notificationService.emit('user:invited', {
-      email,
+      email:       email,
+      nombre:      `${name} ${lastName}`,
       invitadoPor: usuarioAdmin.email,
     });
 
