@@ -1,10 +1,11 @@
 // Middleware centralizado de manejo de errores
-// Debe registrarse siempre al final de app.js
 // Distingue entre errores operacionales y errores inesperados
+// Los errores 5XX se notifican automaticamente a Slack
 
 import mongoose from 'mongoose';
+import { sendErrorToSlack } from '../services/logger.service.js';
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = async (err, req, res, next) => {
   console.error('Error:', err.message);
 
   // Error operacional lanzado con AppError
@@ -38,7 +39,9 @@ export const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Error generico — en desarrollo mostramos el stack, en produccion no
+  // Error generico 5XX, notificamos a Slack
+  await sendErrorToSlack(err, req);
+
   const esDev = process.env.NODE_ENV === 'development';
   res.status(500).json({
     error:   true,
