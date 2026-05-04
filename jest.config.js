@@ -1,8 +1,10 @@
-// Configuración de Jest para ESM
-// Usamos mongodb-memory-server para no tocar la BD real en los tests
 export default {
   testEnvironment: 'node',
-  transform: {},
-  testMatch: ['**/tests/**/*.test.js'],
+  transform:       {},
+  testMatch:       ['**/tests/**/*.test.js'],
   collectCoverageFrom: ['src/**/*.js'],
+  setupFilesAfterEnv: ['./tests/setup.js'],
+  globals: {
+    jest: true,
+  },
 };
