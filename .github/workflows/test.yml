@@ -1,0 +1,51 @@
+# Pipeline de GitHub Actions
+# Se ejecuta automaticamente en cada push y pull request
+# Ejecuta los tests con mongodb-memory-server
+
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descargamos el codigo del repositorio
+      - name: Checkout codigo
+        uses: actions/checkout@v4
+
+      # 2. Configuramos Node.js 22
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      # 3. Instalamos las dependencias
+      - name: Instalar dependencias
+        run: npm ci
+
+      # 4. Ejecutamos los tests con variables de entorno de prueba
+      - name: Ejecutar tests
+        run: npm test
+        env:
+          NODE_ENV: test
+          PORT: 3001
+          DB_URI: mongodb://localhost/test
+          JWT_SECRET: test_secret_key_para_github_actions_32_chars
+          JWT_ACCESS_EXPIRES: 15m
+          JWT_REFRESH_EXPIRES: 7d
+          PUBLIC_URL: http://localhost:3001
+          CLOUDINARY_CLOUD_NAME: test
+          CLOUDINARY_API_KEY: test
+          CLOUDINARY_API_SECRET: test
+          MAIL_HOST: sandbox.smtp.mailtrap.io
+          MAIL_PORT: 587
+          MAIL_USER: test
+          MAIL_PASS: test
+          SLACK_WEBHOOK_URL: ''
