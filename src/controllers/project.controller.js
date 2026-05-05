@@ -130,9 +130,9 @@ export const getProjects = async (req, res, next) => {
       proyectos,
       paginacion: {
         totalItems:  total,
-        totalPages:  Math.ceil(total / limit),
-        currentPage: page,
-        limit,
+        totalPages:  Math.ceil(total / Number(limit)),
+        currentPage: Number(page),
+        limit:       Number(limit),
       },
     });
   } catch (err) {

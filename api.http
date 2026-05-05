@@ -1,0 +1,240 @@
+### BildyApp API Final — Tests
+
+@baseUrl = http://localhost:3000/api
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2OWY5ZmU3N2Q0YjYyY2Y1NjE0Y2I4MDkiLCJyb2xlIjoiZ3Vlc3QiLCJpYXQiOjE3Nzc5OTI4ODEsImV4cCI6MTc3Nzk5Mzc4MX0.3NFNfkQu4qAiJJ46gODAXP0lYcQvfhphXQxLjNNN8vM
+@refreshToken = fd8bf6202530b0e0e29890a14b2b1d8078d735c0a9724e80f6c57c55912e5f7f3bce06f39e02f189da2aac7adabfa3cc95dd343f3d597063a449da1eb5950365
+@clienteId = 69fa0046d4b62cf5614cb826
+@proyectoId = 69fa00ebd4b62cf5614cb842
+@albaranId = 69fa03c9d3fc8da6a0ba74af
+
+### HEALTH CHECK
+
+GET http://localhost:3000/health HTTP/1.1
+
+### USUARIOS
+
+### 1. Registro
+POST {{baseUrl}}/user/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "prueba1@example.com",
+  "password": "Test1234!"
+}
+
+### 2. Validar email
+PUT {{baseUrl}}/user/validation HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "code": "869229"
+}
+
+### 3. Login
+POST {{baseUrl}}/user/login HTTP/1.1
+Content-Type: application/json
+
+{
+  "email": "prueba1@example.com",
+  "password": "Test1234!"
+}
+
+### 4. Onboarding, datos personales
+PUT {{baseUrl}}/user/register HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Juan",
+  "lastName": "Garcia",
+  "nif": "12345678A"
+}
+
+### 5. Onboarding, datos de compania
+PATCH {{baseUrl}}/user/company HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "isFreelance": false,
+  "name": "Acme Construcciones",
+  "cif": "B12345678",
+  "address": {
+    "street": "Calle Mayor",
+    "number": "1",
+    "postal": "28001",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### 6. Obtener usuario
+GET {{baseUrl}}/user HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 7. Refresh token
+POST {{baseUrl}}/user/refresh HTTP/1.1
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 8. Logout
+POST {{baseUrl}}/user/logout HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 9. Crear cliente
+POST {{baseUrl}}/client HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Cliente Test SA",
+  "cif": "A12345678",
+  "email": "cliente@test.com",
+  "phone": "600000000",
+  "address": {
+    "street": "Calle Cliente",
+    "number": "5",
+    "postal": "28002",
+    "city": "Madrid",
+    "province": "Madrid"
+  }
+}
+
+### 10. Listar clientes
+GET {{baseUrl}}/client HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 11. Obtener cliente concreto
+GET {{baseUrl}}/client/{{clienteId}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 12. Actualizar cliente
+PUT {{baseUrl}}/client/{{clienteId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Cliente Test Actualizado",
+  "email": "actualizado@test.com"
+}
+
+### 13. Archivar cliente (soft delete)
+DELETE {{baseUrl}}/client/{{clienteId}}?soft=true HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 14. Listar clientes archivados
+GET {{baseUrl}}/client/archived HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 15. Restaurar cliente
+PATCH {{baseUrl}}/client/{{clienteId}}/restore HTTP/1.1
+Authorization: Bearer {{token}}
+
+### PROYECTOS
+
+### 16. Crear proyecto
+POST {{baseUrl}}/project HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Proyecto Test",
+  "projectCode": "PRJ-001",
+  "client": "{{clienteId}}",
+  "address": {
+    "street": "Calle Proyecto",
+    "number": "10",
+    "postal": "28003",
+    "city": "Madrid",
+    "province": "Madrid"
+  },
+  "email": "proyecto@test.com",
+  "notes": "Notas del proyecto"
+}
+
+### 17. Listar proyectos
+GET {{baseUrl}}/project HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 18. Obtener proyecto concreto
+GET {{baseUrl}}/project/{{proyectoId}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 19. Actualizar proyecto
+PUT {{baseUrl}}/project/{{proyectoId}} HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Proyecto Actualizado",
+  "projectCode": "PRJ-001",
+  "client": "{{clienteId}}"
+}
+
+### 20. Archivar proyecto
+DELETE {{baseUrl}}/project/{{proyectoId}}?soft=true HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 21. Listar proyectos archivados
+GET {{baseUrl}}/project/archived HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 22. Restaurar proyecto
+PATCH {{baseUrl}}/project/{{proyectoId}}/restore HTTP/1.1
+Authorization: Bearer {{token}}
+
+### ALBARANES
+
+### 23. Crear albaran de horas
+POST {{baseUrl}}/deliverynote HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "format": "hours",
+  "project": "{{proyectoId}}",
+  "client": "{{clienteId}}",
+  "description": "Trabajo de albanileria",
+  "workDate": "2026-05-01",
+  "hours": 8,
+  "workers": [
+    { "name": "Juan Garcia", "hours": 4 },
+    { "name": "Pedro Lopez", "hours": 4 }
+  ]
+}
+
+### 24. Crear albaran de materiales
+POST {{baseUrl}}/deliverynote HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "format": "material",
+  "project": "{{proyectoId}}",
+  "client": "{{clienteId}}",
+  "description": "Entrega de cemento",
+  "workDate": "2026-05-01",
+  "material": "Cemento Portland",
+  "quantity": 50,
+  "unit": "sacos"
+}
+
+### 25. Listar albaranes
+GET {{baseUrl}}/deliverynote HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 26. Obtener albaran concreto
+GET {{baseUrl}}/deliverynote/{{albaranId}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 27. Descargar PDF del albaran
+GET {{baseUrl}}/deliverynote/pdf/{{albaranId}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+### 28. Eliminar albaran
+DELETE {{baseUrl}}/deliverynote/{{albaranId}} HTTP/1.1
+Authorization: Bearer {{token}}

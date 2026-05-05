@@ -108,9 +108,9 @@ export const getDeliveryNotes = async (req, res, next) => {
       albaranes,
       paginacion: {
         totalItems:  total,
-        totalPages:  Math.ceil(total / limit),
-        currentPage: page,
-        limit,
+        totalPages:  Math.ceil(total / Number(limit)),
+        currentPage: Number(page),
+        limit:       Number(limit),
       },
     });
   } catch (err) {
