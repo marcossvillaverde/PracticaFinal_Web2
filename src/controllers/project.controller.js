@@ -1,12 +1,9 @@
-// Controlador de proyectos
-// Los proyectos pertenecen a una compañia y estan asociados a un cliente
-// Implementa paginacion, filtros, soft delete y restauracion
+
 
 import Project from '../models/Project.js';
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 
-// POST /api/project
 export const createProject = async (req, res, next) => {
   try {
     const { name, projectCode, client, address, email, notes } = req.body;
@@ -16,7 +13,6 @@ export const createProject = async (req, res, next) => {
       return next(AppError.badRequest('Debes tener una compañia asignada para crear proyectos'));
     }
 
-    // Verificamos que el cliente pertenece a la misma compañia
     const clienteExiste = await Client.findOne({
       _id:     client,
       company: company._id,
@@ -27,7 +23,6 @@ export const createProject = async (req, res, next) => {
       return next(AppError.notFound('Cliente'));
     }
 
-    // El codigo de proyecto debe ser unico dentro de la compañia
     const codigoDuplicado = await Project.findOne({
       company:     company._id,
       projectCode,
@@ -55,7 +50,6 @@ export const createProject = async (req, res, next) => {
   }
 };
 
-// PUT /api/project/:id
 export const updateProject = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -71,7 +65,6 @@ export const updateProject = async (req, res, next) => {
       return next(AppError.notFound('Proyecto'));
     }
 
-    // Si cambia el codigo verificamos que no exista otro proyecto con ese codigo
     if (req.body.projectCode && req.body.projectCode !== proyecto.projectCode) {
       const duplicado = await Project.findOne({
         company:     company._id,
@@ -84,7 +77,6 @@ export const updateProject = async (req, res, next) => {
       }
     }
 
-    // Si cambia el cliente verificamos que pertenece a la compañia
     if (req.body.client) {
       const clienteExiste = await Client.findOne({
         _id:     req.body.client,
@@ -105,16 +97,13 @@ export const updateProject = async (req, res, next) => {
   }
 };
 
-// GET /api/project
 export const getProjects = async (req, res, next) => {
   try {
     const { company } = req.user;
     const { page, limit, name, client, active, sort } = req.query;
 
-    // Construimos el filtro base
     const filtro = { company: company._id, deleted: false };
 
-    // Filtros opcionales
     if (name)   filtro.name   = { $regex: name, $options: 'i' };
     if (client) filtro.client = client;
     if (active !== undefined) filtro.active = active;
@@ -140,7 +129,6 @@ export const getProjects = async (req, res, next) => {
   }
 };
 
-// GET /api/project/archived
 export const getArchivedProjects = async (req, res, next) => {
   try {
     const { company } = req.user;
@@ -156,7 +144,6 @@ export const getArchivedProjects = async (req, res, next) => {
   }
 };
 
-// GET /api/project/:id
 export const getProject = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -178,7 +165,6 @@ export const getProject = async (req, res, next) => {
   }
 };
 
-// DELETE /api/project/:id
 export const deleteProject = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -208,7 +194,6 @@ export const deleteProject = async (req, res, next) => {
   }
 };
 
-// PATCH /api/project/:id/restore
 export const restoreProject = async (req, res, next) => {
   try {
     const { id } = req.params;

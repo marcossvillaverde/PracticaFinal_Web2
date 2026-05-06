@@ -1,11 +1,8 @@
-// Servicio de envío de emails con Nodemailer
-// Usa Mailtrap como sandbox en desarrollo para no enviar emails reales
-// En tests no se envian emails para no depender de credenciales externas
+
 
 import nodemailer from 'nodemailer';
 import { config } from '../config/index.js';
 
-// Creamos el transporter con las credenciales del .env
 const transporter = nodemailer.createTransport({
   host: config.mail.host,
   port: config.mail.port,
@@ -15,9 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Funcion generica para enviar emails
 const sendMail = async ({ to, subject, html }) => {
-  // En modo test no enviamos emails reales para no depender de credenciales externas
   if (process.env.NODE_ENV === 'test') {
     console.log(`[TEST] Email simulado a ${to}: ${subject}`);
     return;
@@ -36,7 +31,6 @@ const sendMail = async ({ to, subject, html }) => {
   }
 };
 
-// ── Templates de emails ────────────────────────────────────────────────────
 
 // Email de verificacion de cuenta con el codigo de 6 digitos
 export const sendVerificationEmail = async (email, code) => {
@@ -60,7 +54,6 @@ export const sendVerificationEmail = async (email, code) => {
   });
 };
 
-// Email de bienvenida para usuarios invitados
 export const sendInvitationEmail = async (email, nombre, invitadoPor) => {
   await sendMail({
     to:      email,

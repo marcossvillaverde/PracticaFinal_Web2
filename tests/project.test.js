@@ -1,4 +1,3 @@
-// Tests de integracion para el modulo de proyectos
 
 import request from 'supertest';
 import app from '../src/app.js';

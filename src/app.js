@@ -1,5 +1,3 @@
-// Configuracion principal de Express
-// Aqui se registran todos los middlewares globales y las rutas
 
 import express from 'express';
 import helmet from 'helmet';
@@ -16,7 +14,6 @@ import deliveryNoteRoutes from './routes/deliverynote.routes.js';
 
 const app = express();
 
-// Seguridad
 app.use(helmet());
 app.use(cors());
 app.use(
@@ -29,18 +26,13 @@ app.use(
   })
 );
 
-// Parseo del body
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Archivos estaticos
 app.use('/uploads', express.static('uploads'));
 
-// Documentacion Swagger
-// Accesible en http://localhost:3000/api-docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Health check
 app.get('/health', (_req, res) => {
   res.json({
     status:    'ok',
@@ -50,13 +42,11 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// Rutas de la API
 app.use('/api/user',         userRoutes);
 app.use('/api/client',       clientRoutes);
 app.use('/api/project',      projectRoutes);
 app.use('/api/deliverynote', deliveryNoteRoutes);
 
-// Manejo de errores
 app.use(notFound);
 app.use(errorHandler);
 

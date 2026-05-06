@@ -1,15 +1,11 @@
-// Validadores Zod para el módulo de albaranes
-// Usamos discriminatedUnion para validar segun el tipo de albaran (material u horas)
 
 import { z } from 'zod';
 
-// Subschema para trabajadores en albaranes de horas
 const workerSchema = z.object({
   name:  z.string().trim().min(1, 'El nombre del trabajador es obligatorio'),
   hours: z.number().min(0, 'Las horas no pueden ser negativas'),
 });
 
-// Schema principal con discriminatedUnion segun el formato
 export const deliveryNoteSchema = z.object({
   body: z.discriminatedUnion('format', [
 
@@ -25,7 +21,6 @@ export const deliveryNoteSchema = z.object({
       unit:        z.string().trim().min(1, 'La unidad es obligatoria'),
     }),
 
-    // Albaran de horas
     z.object({
       format:      z.literal('hours'),
       project:     z.string().min(1, 'El proyecto es obligatorio'),
@@ -39,7 +34,6 @@ export const deliveryNoteSchema = z.object({
   ]),
 });
 
-// Parametros de paginacion y filtros para el listado
 export const deliveryNoteQuerySchema = z.object({
   query: z.object({
     page:    z.string().optional().transform(v => Number(v) || 1),

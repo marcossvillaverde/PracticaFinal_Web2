@@ -1,5 +1,4 @@
-// Rutas del módulo de albaranes
-// Todas las rutas requieren autenticacion JWT
+
 
 import { Router } from 'express';
 import {

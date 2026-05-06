@@ -1,5 +1,4 @@
-// Rutas del módulo de proyectos
-// Todas las rutas requieren autenticacion JWT
+
 
 import { Router } from 'express';
 import {

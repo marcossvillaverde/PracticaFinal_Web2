@@ -1,5 +1,4 @@
-// Conexión a MongoDB mediante Mongoose
-// Se exporta la función dbConnect para llamarla al arrancar el servidor
+
 
 import mongoose from 'mongoose';
 import { config } from './index.js';
@@ -14,7 +13,6 @@ const dbConnect = async () => {
   }
 };
 
-// Aviso si se pierde la conexion en tiempo de ejecucion
 mongoose.connection.on('disconnected', () => {
   console.warn('Desconectado de MongoDB');
 });

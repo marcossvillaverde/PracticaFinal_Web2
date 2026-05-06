@@ -1,5 +1,3 @@
-// La documentacion interactiva estara disponible en /api-docs
-// Usamos swagger-jsdoc para generar la spec
 
 import swaggerJsdoc from 'swagger-jsdoc';
 
@@ -23,7 +21,6 @@ const options = {
         },
       },
       schemas: {
-        // Usuario
         Usuario: {
           type: 'object',
           properties: {
@@ -38,7 +35,6 @@ const options = {
             company:  { $ref: '#/components/schemas/Compania' },
           },
         },
-        // Compania
         Compania: {
           type: 'object',
           properties: {
@@ -49,7 +45,6 @@ const options = {
             logo:        { type: 'string', nullable: true },
           },
         },
-        // Cliente
         Cliente: {
           type: 'object',
           properties: {
@@ -61,7 +56,6 @@ const options = {
             deleted: { type: 'boolean' },
           },
         },
-        // Proyecto
         Proyecto: {
           type: 'object',
           properties: {
@@ -73,7 +67,6 @@ const options = {
             deleted:     { type: 'boolean' },
           },
         },
-        // Albaran
         Albaran: {
           type: 'object',
           properties: {
@@ -89,7 +82,6 @@ const options = {
             project:     { $ref: '#/components/schemas/Proyecto' },
           },
         },
-        // Respuesta de error
         Error: {
           type: 'object',
           properties: {
@@ -98,7 +90,6 @@ const options = {
             code:    { type: 'string', example: 'NOT_FOUND' },
           },
         },
-        // Paginacion
         Paginacion: {
           type: 'object',
           properties: {
@@ -112,7 +103,6 @@ const options = {
     },
     security: [{ bearerAuth: [] }],
   },
-  // Rutas donde swagger-jsdoc buscara las anotaciones
   apis: ['./src/routes/*.js'],
 };
 

@@ -1,24 +1,20 @@
-// Tests de integracion para el modulo de autenticacion
-// Cubre registro, verificacion de email, login, refresh y logout
+
 
 import request from 'supertest';
 import app from '../src/app.js';
 import User from '../src/models/User.js';
 import { jest } from '@jest/globals';
 
-// Mock del servicio de notificaciones para no enviar emails reales en tests
 jest.mock('../src/services/notification.service.js', () => ({
   default: { emit: jest.fn(), on: jest.fn() },
 }));
 
-// Mock de Socket.IO para no necesitar servidor HTTP en tests
 jest.mock('../src/sockets/index.js', () => ({
   getIO: () => ({ to: () => ({ emit: jest.fn() }) }),
 }));
 
 describe('Autenticacion', () => {
 
-  // Registro
   describe('POST /api/user/register', () => {
     it('debe registrar un usuario correctamente', async () => {
       const res = await request(app)
@@ -50,7 +46,6 @@ describe('Autenticacion', () => {
     });
 
     it('debe fallar si el email ya esta verificado', async () => {
-      // Creamos un usuario verificado primero
       await User.create({
         email:    'test@example.com',
         password: 'hash',
@@ -65,10 +60,8 @@ describe('Autenticacion', () => {
     });
   });
 
-  // Login
   describe('POST /api/user/login', () => {
     beforeEach(async () => {
-      // Registramos un usuario antes de cada test de login
       await request(app)
         .post('/api/user/register')
         .send({ email: 'login@example.com', password: 'Test1234!' });
@@ -100,10 +93,8 @@ describe('Autenticacion', () => {
     });
   });
 
-  // Obtener usuario
   describe('GET /api/user', () => {
     it('debe obtener el usuario autenticado', async () => {
-      // Registramos y obtenemos el token
       const registro = await request(app)
         .post('/api/user/register')
         .send({ email: 'getuser@example.com', password: 'Test1234!' });
@@ -124,7 +115,6 @@ describe('Autenticacion', () => {
     });
   });
 
-  // Refresh token
   describe('POST /api/user/refresh', () => {
     it('debe renovar el access token', async () => {
       const registro = await request(app)

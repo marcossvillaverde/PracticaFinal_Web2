@@ -1,5 +1,4 @@
-// Controlador de usuarios
-// Gestiona registro, verificacion, login, onboarding, sesion y administracion
+
 
 import User from '../models/User.js';
 import Company from '../models/Company.js';
@@ -9,10 +8,8 @@ import { AppError } from '../utils/AppError.js';
 import notificationService from '../services/notification.service.js';
 import { config } from '../config/index.js';
 
-// Genera un codigo de verificacion de 6 digitos
 const generarCodigo = () => String(Math.floor(100000 + Math.random() * 900000));
 
-// Construye la respuesta estandar con tokens y datos basicos del usuario
 const respuestaConTokens = (res, statusCode, usuario, refreshToken) => {
   const accessToken = generateAccessToken(usuario);
   res.status(statusCode).json({
@@ -28,12 +25,10 @@ const respuestaConTokens = (res, statusCode, usuario, refreshToken) => {
   });
 };
 
-// POST /api/user/register
 export const register = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Evitamos registros duplicados de cuentas ya verificadas
     const existente = await User.findOne({ email, status: 'verified' });
     if (existente) {
       return next(AppError.conflict('Ya existe una cuenta verificada con ese email'));
@@ -53,7 +48,6 @@ export const register = async (req, res, next) => {
     usuario.refreshToken = refreshToken;
     await usuario.save();
 
-    // Emitimos evento para enviar email de verificacion
     notificationService.emit('user:registered', { email, verificationCode });
 
     respuestaConTokens(res, 201, usuario, refreshToken);
@@ -62,7 +56,6 @@ export const register = async (req, res, next) => {
   }
 };
 
-// PUT /api/user/validation
 export const validateEmail = async (req, res, next) => {
   try {
     const { code } = req.body;
@@ -96,7 +89,6 @@ export const validateEmail = async (req, res, next) => {
   }
 };
 
-// POST /api/user/login
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -122,7 +114,6 @@ export const login = async (req, res, next) => {
   }
 };
 
-// POST /api/user/refresh
 export const refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -137,7 +128,6 @@ export const refresh = async (req, res, next) => {
       return next(AppError.unauthorized('Refresh token invalido o expirado'));
     }
 
-    // Rotacion de tokens: invalidamos el anterior y generamos uno nuevo
     const nuevoRefreshToken = generateRefreshToken();
     usuario.refreshToken = nuevoRefreshToken;
     await usuario.save();
@@ -149,7 +139,6 @@ export const refresh = async (req, res, next) => {
   }
 };
 
-// POST /api/user/logout
 export const logout = async (req, res, next) => {
   try {
     const usuario = await User.findById(req.user._id);
@@ -162,7 +151,6 @@ export const logout = async (req, res, next) => {
   }
 };
 
-// PUT /api/user/register (datos personales)
 export const updatePersonalData = async (req, res, next) => {
   try {
     const { name, lastName, nif, address } = req.body;
@@ -179,7 +167,6 @@ export const updatePersonalData = async (req, res, next) => {
   }
 };
 
-// PATCH /api/user/company
 export const updateCompany = async (req, res, next) => {
   try {
     const usuario = await User.findById(req.user._id);
@@ -189,14 +176,12 @@ export const updateCompany = async (req, res, next) => {
     let nombreFinal   = name;
     let direccionFinal = address;
 
-    // Si es autonomo usamos sus datos personales como datos de la compañia
     if (isFreelance) {
       cifFinal       = usuario.nif;
       nombreFinal    = `${usuario.name} ${usuario.lastName}`;
       direccionFinal = usuario.address;
     }
 
-    // Si ya existe una compañia con ese CIF el usuario se une como guest
     let company = await Company.findOne({ cif: cifFinal, deleted: false });
 
     if (company) {
@@ -222,7 +207,6 @@ export const updateCompany = async (req, res, next) => {
   }
 };
 
-// PATCH /api/user/logo
 export const uploadLogo = async (req, res, next) => {
   try {
     if (!req.file) {
@@ -249,7 +233,6 @@ export const uploadLogo = async (req, res, next) => {
   }
 };
 
-// GET /api/user
 export const getUser = async (req, res, next) => {
   try {
     const usuario = await User.findById(req.user._id).populate('company');
@@ -259,19 +242,16 @@ export const getUser = async (req, res, next) => {
   }
 };
 
-// DELETE /api/user
 export const deleteUser = async (req, res, next) => {
   try {
     const { soft } = req.query;
     const usuario = await User.findById(req.user._id);
 
     if (soft === 'true') {
-      // Borrado logico: marcamos como eliminado pero mantenemos los datos
       usuario.deleted = true;
       usuario.refreshToken = null;
       await usuario.save();
     } else {
-      // Borrado fisico: eliminamos el documento de la BD
       await User.findByIdAndDelete(req.user._id);
     }
 
@@ -282,7 +262,6 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
-// PUT /api/user/password
 export const changePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -302,7 +281,6 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
-// POST /api/user/invite
 export const inviteUser = async (req, res, next) => {
   try {
     const { email, name, lastName } = req.body;

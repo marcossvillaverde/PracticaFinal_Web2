@@ -238,3 +238,15 @@ Authorization: Bearer {{token}}
 ### 28. Eliminar albaran
 DELETE {{baseUrl}}/deliverynote/{{albaranId}} HTTP/1.1
 Authorization: Bearer {{token}}
+
+### Firmar albaran
+PATCH {{baseUrl}}/deliverynote/{{albaranId}}/sign HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=----FormBoundary
+
+------FormBoundary
+Content-Disposition: form-data; name="signature"; filename="Carnet-Delante.jpeg"
+Content-Type: image/jpeg
+
+< C:\Users\GU604\Desktop\IMPORTANTES\Carnet-Delante.jpeg
+------FormBoundary--

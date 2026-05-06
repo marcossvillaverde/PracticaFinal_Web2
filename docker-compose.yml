@@ -1,5 +1,4 @@
-# Docker Compose para desarrollo local
-# Levanta la aplicacion Node.js y una instancia de MongoDB
+
 
 version: '3.9'
 

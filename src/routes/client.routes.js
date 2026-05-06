@@ -1,5 +1,3 @@
-// Rutas del módulo de clientes
-// Todas las rutas requieren autenticacion JWT
 
 import { Router } from 'express';
 import {

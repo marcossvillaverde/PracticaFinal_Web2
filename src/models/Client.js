@@ -1,7 +1,3 @@
-// Modelo de cliente
-// Los clientes pertenecen a una compañía y son creados por un usuario
-// Todos los usuarios de la misma compañía pueden ver los clientes
-// Implementa soft delete con el campo deleted
 
 import mongoose from 'mongoose';
 
@@ -15,14 +11,12 @@ const addressSchema = new mongoose.Schema({
 
 const clientSchema = new mongoose.Schema(
   {
-    // Usuario que creó el cliente
     user: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: true,
       index:    true,
     },
-    // Compañía a la que pertenece, permite compartir clientes entre usuarios
     company: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'Company',
@@ -39,7 +33,6 @@ const clientSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-// Indice compuesto: un CIF no puede repetirse dentro de la misma compañía
 clientSchema.index({ company: 1, cif: 1 }, { unique: true, sparse: true });
 
 const Client = mongoose.model('Client', clientSchema);

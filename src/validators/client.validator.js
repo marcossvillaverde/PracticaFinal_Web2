@@ -1,4 +1,3 @@
-// Validadores Zod para el módulo de clientes
 
 import { z } from 'zod';
 
@@ -10,7 +9,6 @@ const addressSchema = z.object({
   province: z.string().trim().optional(),
 }).optional();
 
-// Crear o actualizar cliente
 export const clientSchema = z.object({
   body: z.object({
     name:    z.string().trim().min(1, 'El nombre es obligatorio'),
@@ -21,7 +19,6 @@ export const clientSchema = z.object({
   }),
 });
 
-// Parametros de paginacion y filtros para el listado
 export const clientQuerySchema = z.object({
   query: z.object({
     page:  z.string().optional().transform(v => Number(v) || 1),

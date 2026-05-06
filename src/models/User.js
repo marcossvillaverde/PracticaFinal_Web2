@@ -1,6 +1,3 @@
-// Modelo de usuario
-// Incluye autenticación, verificación de email, roles y soft delete
-// El campo password tiene select: false para no devolverlo por defecto en las consultas
 
 import mongoose from 'mongoose';
 
@@ -25,7 +22,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type:     String,
       required: true,
-      select:   false, // Nunca se devuelve en consultas normales
+      select:   false,
     },
     name:     { type: String, trim: true },
     lastName: { type: String, trim: true },
@@ -61,7 +58,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Virtual: nombre completo calculado a partir de name y lastName
 userSchema.virtual('fullName').get(function () {
   if (this.name && this.lastName) return `${this.name} ${this.lastName}`;
   return this.name || '';

@@ -1,11 +1,7 @@
-// Servicio de logging de errores a Slack
-// Envia un mensaje al canal de Slack configurado cuando ocurre un error 5XX
-// Incluye timestamp, ruta, metodo HTTP, mensaje de error y stack trace
 
 import { config } from '../config/index.js';
 
 export const sendErrorToSlack = async (err, req) => {
-  // Si no hay webhook configurado no hacemos nada
   if (!config.slack.webhookUrl) return;
 
   try {
@@ -56,7 +52,6 @@ export const sendErrorToSlack = async (err, req) => {
       body:    JSON.stringify(mensaje),
     });
   } catch (slackError) {
-    // Si falla el envio a Slack solo lo logamos en consola, no propagamos el error
     console.error('Error al enviar notificacion a Slack:', slackError.message);
   }
 };

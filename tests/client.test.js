@@ -1,5 +1,3 @@
-// Tests de integracion para el modulo de clientes
-// Cubre creacion, listado, obtencion, actualizacion, borrado y restauracion
 
 import request from 'supertest';
 import app from '../src/app.js';
@@ -15,7 +13,6 @@ jest.mock('../src/sockets/index.js', () => ({
   getIO: () => ({ to: () => ({ emit: jest.fn() }) }),
 }));
 
-// Helper: registra un usuario con compañia y devuelve el token
 const crearUsuarioConCompania = async (email = 'admin@example.com') => {
   const registro = await request(app)
     .post('/api/user/register')
@@ -24,14 +21,12 @@ const crearUsuarioConCompania = async (email = 'admin@example.com') => {
   const token = registro.body.accessToken;
   const userId = registro.body.usuario._id;
 
-  // Creamos la compañia directamente en BD
   const company = await Company.create({
     owner: userId,
     name:  'Empresa Test',
     cif:   'B12345678',
   });
 
-  // Asignamos la compañia al usuario
   await User.findByIdAndUpdate(userId, { company: company._id });
 
   return { token, userId, companyId: company._id };
@@ -117,7 +112,6 @@ describe('Clientes', () => {
 
       expect(res.status).toBe(200);
 
-      // Verificamos que ya no aparece en el listado normal
       const listado = await request(app)
         .get('/api/client')
         .set('Authorization', `Bearer ${token}`);
@@ -137,12 +131,10 @@ describe('Clientes', () => {
 
       const clienteId = crear.body.cliente._id;
 
-      // Archivamos el cliente
       await request(app)
         .delete(`/api/client/${clienteId}?soft=true`)
         .set('Authorization', `Bearer ${token}`);
 
-      // Restauramos el cliente
       const res = await request(app)
         .patch(`/api/client/${clienteId}/restore`)
         .set('Authorization', `Bearer ${token}`);

@@ -1,12 +1,9 @@
-// Controlador de clientes
-// Los clientes pertenecen a una compañia y son visibles por todos sus usuarios
-// Implementa paginacion, filtros, soft delete y restauracion
+
 
 import Client from '../models/Client.js';
 import { AppError } from '../utils/AppError.js';
 import { getIO } from '../sockets/index.js';
 
-// POST /api/client
 export const createClient = async (req, res, next) => {
   try {
     const { name, cif, email, phone, address } = req.body;
@@ -16,7 +13,6 @@ export const createClient = async (req, res, next) => {
       return next(AppError.badRequest('Debes tener una compañia asignada para crear clientes'));
     }
 
-    // Comprobamos que no exista ya un cliente con ese CIF en la compañia
     if (cif) {
       const existente = await Client.findOne({ company: company._id, cif, deleted: false });
       if (existente) {
@@ -34,7 +30,6 @@ export const createClient = async (req, res, next) => {
       address,
     });
 
-    // Emitimos evento en tiempo real a todos los usuarios de la compañia
     getIO().to(company._id.toString()).emit('client:new', {
       _id:  cliente._id,
       name: cliente.name,
@@ -46,7 +41,6 @@ export const createClient = async (req, res, next) => {
   }
 };
 
-// PUT /api/client/:id
 export const updateClient = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -62,7 +56,6 @@ export const updateClient = async (req, res, next) => {
       return next(AppError.notFound('Cliente'));
     }
 
-    // Si cambia el CIF comprobamos que no exista otro cliente con ese CIF
     if (req.body.cif && req.body.cif !== cliente.cif) {
       const duplicado = await Client.findOne({
         company: company._id,
@@ -90,10 +83,8 @@ export const getClients = async (req, res, next) => {
     const { company } = req.user;
     const { page, limit, name, sort } = req.query;
 
-    // Construimos el filtro base
     const filtro = { company: company._id, deleted: false };
 
-    // Filtro por nombre (busqueda parcial, insensible a mayusculas)
     if (name) {
       filtro.name = { $regex: name, $options: 'i' };
     }
@@ -118,7 +109,6 @@ export const getClients = async (req, res, next) => {
   }
 };
 
-// GET /api/client/archived
 export const getArchivedClients = async (req, res, next) => {
   try {
     const { company } = req.user;
@@ -134,7 +124,6 @@ export const getArchivedClients = async (req, res, next) => {
   }
 };
 
-// GET /api/client/:id
 export const getClient = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -156,7 +145,6 @@ export const getClient = async (req, res, next) => {
   }
 };
 
-// DELETE /api/client/:id
 export const deleteClient = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -174,7 +162,6 @@ export const deleteClient = async (req, res, next) => {
     }
 
     if (soft === 'true') {
-      // Borrado logico: el cliente queda archivado y se puede restaurar
       cliente.deleted = true;
       await cliente.save();
     } else {
@@ -188,7 +175,6 @@ export const deleteClient = async (req, res, next) => {
   }
 };
 
-// PATCH /api/client/:id/restore
 export const restoreClient = async (req, res, next) => {
   try {
     const { id } = req.params;

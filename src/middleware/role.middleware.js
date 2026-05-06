@@ -1,6 +1,3 @@
-// Middleware de autorización por roles
-// Verifica que el usuario tiene uno de los roles permitidos
-// Siempre debe usarse después de authMiddleware
 
 import { AppError } from '../utils/AppError.js';
 

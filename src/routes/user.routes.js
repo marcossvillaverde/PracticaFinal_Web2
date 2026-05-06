@@ -1,5 +1,3 @@
-// Rutas del módulo de usuarios
-// Todas las rutas protegidas requieren el middleware de autenticacion JWT
 
 import { Router } from 'express';
 import {

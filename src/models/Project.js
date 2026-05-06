@@ -1,6 +1,3 @@
-// Modelo de proyecto
-// Los proyectos pertenecen a una compañía y están asociados a un cliente
-// Implementa soft delete y campo active para proyectos en curso
 
 import mongoose from 'mongoose';
 
@@ -14,21 +11,18 @@ const addressSchema = new mongoose.Schema({
 
 const projectSchema = new mongoose.Schema(
   {
-    // Usuario que creó el proyecto
     user: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'User',
       required: true,
       index:    true,
     },
-    // Compañía a la que pertenece
     company: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'Company',
       required: true,
       index:    true,
     },
-    // Cliente asociado al proyecto
     client: {
       type:     mongoose.Schema.Types.ObjectId,
       ref:      'Client',
@@ -46,7 +40,6 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true, versionKey: false }
 );
 
-// Indice compuesto: el codigo de proyecto debe ser unico dentro de la compañía
 projectSchema.index({ company: 1, projectCode: 1 }, { unique: true });
 
 const Project = mongoose.model('Project', projectSchema);

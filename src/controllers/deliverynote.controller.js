@@ -1,6 +1,4 @@
-// Controlador de albaranes
-// Gestiona creacion, listado, detalle y borrado de albaranes
-// La firma y generacion de PDF se implementan en commits posteriores
+
 
 import DeliveryNote from '../models/DeliveryNote.js';
 import Project from '../models/Project.js';
@@ -10,7 +8,6 @@ import { generateDeliveryNotePDF } from '../services/pdf.service.js';
 import { uploadSignature, uploadPDF } from '../services/storage.service.js';
 import { getIO } from '../sockets/index.js';
 
-// POST /api/deliverynote
 export const createDeliveryNote = async (req, res, next) => {
   try {
     const { _id: user, company } = req.user;
@@ -22,7 +19,6 @@ export const createDeliveryNote = async (req, res, next) => {
     const { project, client, format, description, workDate,
             material, quantity, unit, hours, workers } = req.body;
 
-    // Verificamos que el proyecto pertenece a la compañia
     const proyectoExiste = await Project.findOne({
       _id:     project,
       company: company._id,
@@ -33,7 +29,6 @@ export const createDeliveryNote = async (req, res, next) => {
       return next(AppError.notFound('Proyecto'));
     }
 
-    // Verificamos que el cliente pertenece a la compañia
     const clienteExiste = await Client.findOne({
       _id:     client,
       company: company._id,
@@ -52,16 +47,13 @@ export const createDeliveryNote = async (req, res, next) => {
       format,
       description,
       workDate:  new Date(workDate),
-      // Campos de material
       material,
       quantity,
       unit,
-      // Campos de horas
       hours,
       workers,
     });
 
-    // Emitimos evento en tiempo real a todos los usuarios de la compañia
     getIO().to(company._id.toString()).emit('deliverynote:new', {
       _id:    albaran._id,
       format: albaran.format,
@@ -73,22 +65,18 @@ export const createDeliveryNote = async (req, res, next) => {
   }
 };
 
-// GET /api/deliverynote
 export const getDeliveryNotes = async (req, res, next) => {
   try {
     const { company } = req.user;
     const { page, limit, project, client, format, signed, from, to, sort } = req.query;
 
-    // Filtro base por compañia y sin borrar
     const filtro = { company: company._id, deleted: false };
 
-    // Filtros opcionales
     if (project) filtro.project = project;
     if (client)  filtro.client  = client;
     if (format)  filtro.format  = format;
     if (signed !== undefined) filtro.signed = signed;
 
-    // Filtro por rango de fechas
     if (from || to) {
       filtro.workDate = {};
       if (from) filtro.workDate.$gte = new Date(from);
@@ -118,13 +106,11 @@ export const getDeliveryNotes = async (req, res, next) => {
   }
 };
 
-// GET /api/deliverynote/:id
 export const getDeliveryNote = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { company } = req.user;
 
-    // Usamos populate para traer los datos completos de usuario, cliente y proyecto
     const albaran = await DeliveryNote.findOne({
       _id:     id,
       company: company._id,
@@ -145,7 +131,6 @@ export const getDeliveryNote = async (req, res, next) => {
   }
 };
 
-// DELETE /api/deliverynote/:id
 export const deleteDeliveryNote = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -161,7 +146,6 @@ export const deleteDeliveryNote = async (req, res, next) => {
       return next(AppError.notFound('Albaran'));
     }
 
-    // Un albaran firmado no puede borrarse
     if (albaran.signed) {
       return next(AppError.forbidden('No se puede eliminar un albaran firmado'));
     }
@@ -174,7 +158,6 @@ export const deleteDeliveryNote = async (req, res, next) => {
   }
 };
 
-// GET /api/deliverynote/pdf/:id
 export const downloadPDF = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -194,15 +177,12 @@ export const downloadPDF = async (req, res, next) => {
       return next(AppError.notFound('Albaran'));
     }
 
-    // Si ya esta firmado y tiene PDF en la nube lo redirigimos directamente
     if (albaran.signed && albaran.pdfUrl) {
       return res.redirect(albaran.pdfUrl);
     }
 
-    // Generamos el PDF en memoria
     const pdfBuffer = await generateDeliveryNotePDF(albaran);
 
-    // Enviamos el PDF como descarga
     res.set({
       'Content-Type':        'application/pdf',
       'Content-Disposition': `attachment; filename="albaran-${albaran._id}.pdf"`,
@@ -215,7 +195,6 @@ export const downloadPDF = async (req, res, next) => {
   }
 };
 
-// PATCH /api/deliverynote/:id/sign
 export const signDeliveryNote = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -239,27 +218,22 @@ export const signDeliveryNote = async (req, res, next) => {
       return next(AppError.notFound('Albaran'));
     }
 
-    // Un albaran ya firmado no puede volver a firmarse
     if (albaran.signed) {
       return next(AppError.conflict('El albaran ya esta firmado'));
     }
 
-    // Subimos la firma a Cloudinary optimizada con Sharp
     const signatureUrl = await uploadSignature(req.file.buffer);
 
-    // Marcamos el albaran como firmado
     albaran.signed       = true;
     albaran.signedAt     = new Date();
     albaran.signatureUrl = signatureUrl;
 
-    // Generamos el PDF con la firma incluida y lo subimos a Cloudinary
     const pdfBuffer = await generateDeliveryNotePDF(albaran);
     const pdfUrl    = await uploadPDF(pdfBuffer, `albaran-${albaran._id}`);
     albaran.pdfUrl  = pdfUrl;
 
     await albaran.save();
 
-    // Notificamos a la compañia que el albaran ha sido firmado
     getIO().to(company._id.toString()).emit('deliverynote:signed', {
       _id:          albaran._id,
       signatureUrl,

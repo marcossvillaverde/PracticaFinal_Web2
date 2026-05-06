@@ -1,15 +1,13 @@
-# Dependencias
 node_modules/
 
-# Variables de entorno reales (nunca subir)
 .env
 
-# Archivos subidos localmente
 uploads/*
 !uploads/.gitkeep
 
 # Logs
 *.log
 
-# Cobertura de tests
 coverage/
+
+.env.test

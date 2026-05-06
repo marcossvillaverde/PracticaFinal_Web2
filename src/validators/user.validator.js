@@ -1,6 +1,4 @@
-// Validadores Zod para el módulo de usuarios
-// Cada schema valida el body de una petición concreta
-// Los transforms normalizan los datos (email a minúsculas, etc.)
+
 
 import { z } from 'zod';
 
@@ -12,7 +10,6 @@ const addressSchema = z.object({
   province: z.string().trim().optional(),
 }).optional();
 
-// Registro de usuario
 export const registerSchema = z.object({
   body: z.object({
     email:    z.string().email('El email no es valido').transform(v => v.toLowerCase().trim()),
@@ -20,14 +17,12 @@ export const registerSchema = z.object({
   }),
 });
 
-// Validacion del codigo de verificacion de email
 export const validationCodeSchema = z.object({
   body: z.object({
     code: z.string().length(6, 'El codigo debe tener 6 digitos').regex(/^\d{6}$/, 'El codigo debe ser numerico'),
   }),
 });
 
-// Login
 export const loginSchema = z.object({
   body: z.object({
     email:    z.string().email('El email no es valido').transform(v => v.toLowerCase().trim()),
@@ -35,7 +30,6 @@ export const loginSchema = z.object({
   }),
 });
 
-// Onboarding — datos personales
 export const personalDataSchema = z.object({
   body: z.object({
     name:     z.string().trim().min(1, 'El nombre es obligatorio'),
@@ -45,8 +39,6 @@ export const personalDataSchema = z.object({
   }),
 });
 
-// Onboarding, datos de compañía
-// discriminatedUnion permite validar segun si es autonomo o empresa
 export const companyDataBodySchema = z.object({
   body: z.discriminatedUnion('isFreelance', [
     z.object({ isFreelance: z.literal(true) }),
@@ -59,7 +51,6 @@ export const companyDataBodySchema = z.object({
   ]),
 });
 
-// Cambio de contraseña con refine para verificar que son diferentes
 export const changePasswordSchema = z.object({
   body: z.object({
     currentPassword: z.string().min(8, 'La contraseña actual debe tener al menos 8 caracteres'),
@@ -70,7 +61,6 @@ export const changePasswordSchema = z.object({
   ),
 });
 
-// Invitar companero
 export const inviteSchema = z.object({
   body: z.object({
     email:    z.string().email('El email no es valido').transform(v => v.toLowerCase().trim()),

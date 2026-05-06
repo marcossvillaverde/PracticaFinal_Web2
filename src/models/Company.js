@@ -1,7 +1,4 @@
-// Modelo de compañía
-// Cada usuario pertenece a una compañía
-// El campo owner es el administrador principal de la compañía
-// Implementa soft delete con el campo deleted
+
 
 import mongoose from 'mongoose';
 
