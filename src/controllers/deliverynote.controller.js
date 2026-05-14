@@ -147,7 +147,7 @@ export const deleteDeliveryNote = async (req, res, next) => {
     }
 
     if (albaran.signed) {
-      return next(AppError.forbidden('No se puede eliminar un albaran firmado'));
+      return next(AppError.conflict('No se puede eliminar un albaran firmado'));
     }
 
     await DeliveryNote.findByIdAndDelete(id);
