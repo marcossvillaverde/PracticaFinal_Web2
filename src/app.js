@@ -1,10 +1,10 @@
-
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import swaggerUi from 'swagger-ui-express';
+import mongoSanitize from 'express-mongo-sanitize';
 import { notFound, errorHandler } from './middleware/error-handler.js';
 import { swaggerSpec } from './config/swagger.js';
 import userRoutes from './routes/user.routes.js';
@@ -28,6 +28,18 @@ app.use(
 
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Sanitización NoSQL: en Express 5 req.query es read-only (getter),
+// así que sanitizamos solo body y params para evitar el error.
+app.use((req, _res, next) => {
+  if (req.body) {
+    mongoSanitize.sanitize(req.body);
+  }
+  if (req.params) {
+    mongoSanitize.sanitize(req.params);
+  }
+  next();
+});
 
 app.use('/uploads', express.static('uploads'));
 
